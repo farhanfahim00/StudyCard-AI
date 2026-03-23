@@ -1,7 +1,8 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, Form, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from PyPDF2 import PdfReader
-from main import generate_flashcards
+from main import generate_flashcards, generate_quiz_options
+import random
 
 app = FastAPI()
 
@@ -15,7 +16,7 @@ app.add_middleware(
 )
 
 @app.post("/upload")
-async def upload_pdf(file: UploadFile = File(...)):
+async def upload_pdf(file: UploadFile = File(...), mode: str = Form("detailed")):
     pdf = PdfReader(file.file)
 
     text = ""
@@ -24,6 +25,24 @@ async def upload_pdf(file: UploadFile = File(...)):
         if extracted:
             text += extracted
 
-    flashcards = generate_flashcards(text[:3000])
+    flashcards = generate_flashcards(text[:3000], mode=mode) 
 
     return {"flashcards": flashcards}
+
+@app.post("/generate-quiz")
+async def generate_quiz(request: Request):
+    data = await request.json()
+    flashcards = data.get("flashcards", [])
+    
+    quiz = []
+    for card in flashcards:
+        wrong_answers = generate_quiz_options(card["question"], card["answer"])
+        options = wrong_answers + [card["answer"]]
+        random.shuffle(options)
+        quiz.append({
+            "question": card["question"],
+            "correct": card["answer"],
+            "options": options
+        })
+    
+    return {"quiz": quiz}
