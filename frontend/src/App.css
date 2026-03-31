@@ -1,222 +1,224 @@
-.app {
-  text-align: center;
-  background: linear-gradient(135deg, #08e4f0, #17314f);
-  min-height: 100vh;
-  color: white;
-  padding: 20px;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Container */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+  background: linear-gradient(135deg, #0f172a 0%, #1a1f35 100%);
+  color: white;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  color: #a78bfa;
+}
+
+h2 {
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+}
+
+p {
+  color: #cbd5e1;
+  margin-bottom: 10px;
+}
+
+input[type="file"] {
+  margin: 15px 0;
+  padding: 8px;
+}
+
+.mode-selector {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin: 20px 0 30px 0;
+}
+
+.mode-btn {
+  padding: 9px 18px;
+  border: 2px solid #7c3aed;
+  background: transparent;
+  color: #7c3aed;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+  background: #7c3aed;
+  color: white;
+}
+
 .card-container {
-  width: 320px;
-  height: 220px;
+  width: 100%;
+  max-width: 400px;
+  height: 260px;
   margin: 40px auto;
   perspective: 1000px;
   cursor: pointer;
 }
 
-/* Inner */
 .card-inner {
   width: 100%;
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.5s ease;
-  will-change: transform;
 }
 
-/* Flip */
 .card-container.flipped .card-inner {
   transform: rotateY(180deg);
 }
 
-/* Front & Back */
 .card-front,
 .card-back {
   position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 15px;
+  backface-visibility: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
-  font-size: 18px;
-  backface-visibility: hidden;
-  text-align: center;
-  word-wrap: break-word;
-  box-shadow: 0 8px 20px rgba(9, 9, 9, 0.174);
+  padding: 25px;
+  border-radius: 12px;
+  font-size: 16px;
+  line-height: 1.5;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Front */
 .card-front {
-  background: white;
-  color: black;
+  background: linear-gradient(135deg, #fff, #f0f4f8);
+  color: #1a202c;
 }
 
-/* Back */
 .card-back {
-  background: #1b3f66;
-  color: white;
+  background: linear-gradient(135deg, #1e293b, #334155);
+  color: #67e8f9;
   transform: rotateY(180deg);
 }
 
-/* Buttons */
-.controls button {
-  margin: 10px;
-  padding: 10px 20px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-}
-
-.mode-selector {
+.controls {
   display: flex;
-  gap: 10px;
-  margin: 15px 0;
-}
-
-.mode-btn {
-  padding: 8px 20px;
-  border: 2px solid #646cff;
-  background: transparent;
-  color: #646cff;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.mode-btn.active {
-  background: #646cff;
-  color: white;
-}
-
-/* Mode Selector */
-.mode-selector {
-  display: flex;
-  gap: 10px;
-  margin: 15px 0;
   justify-content: center;
+  gap: 12px;
+  margin: 20px 0;
+  flex-wrap: wrap;
 }
 
-.mode-btn {
-  padding: 8px 20px;
-  border: 2px solid #646cff;
-  background: transparent;
-  color: #646cff;
+button {
+  padding: 10px 20px;
+  border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white;
   transition: all 0.2s ease;
 }
 
-.mode-btn.active {
-  background: #646cff;
-  color: white;
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.3);
 }
 
-/* Start Quiz Button */
 .quiz-btn {
   margin-top: 20px;
-  padding: 10px 30px;
-  background: #ff6464;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
 }
 
 .quiz-btn:hover {
-  background: #ff4444;
+  box-shadow: 0 6px 16px rgba(6, 182, 212, 0.3);
 }
 
-/* Quiz Mode */
 .quiz {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 20px;
   margin-top: 20px;
 }
 
 .quiz-question {
-  font-size: 20px;
-  font-weight: bold;
-  text-align: center;
-  padding: 20px;
-  background: #1e1e2e;
-  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 24px;
+  max-width: 650px;
   width: 100%;
-  max-width: 600px;
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 10px;
+  color: white;
+  line-height: 1.6;
 }
 
-/* Options */
 .options {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  max-width: 600px;
+  max-width: 650px;
 }
 
 .option {
-  padding: 12px 20px;
-  border: 2px solid #646cff;
+  padding: 13px 18px;
+  border: 2px solid #334155;
   background: transparent;
   color: white;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
   text-align: left;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .option:hover {
-  background: #646cff33;
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.1);
 }
 
 .option.correct {
-  border-color: #4caf50;
-  background: #4caf5033;
-  color: #4caf50;
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
 }
 
 .option.wrong {
-  border-color: #f44336;
-  background: #f4433633;
-  color: #f44336;
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
 }
 
-/* Next Button */
 .next-btn {
   margin-top: 10px;
-  padding: 10px 30px;
-  background: #646cff;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
 }
 
-.next-btn:hover {
-  background: #4a50cc;
+.end-btn {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
 }
 
-/* Score Screen */
 .score-screen {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 20px;
   margin-top: 40px;
 }
 
 .score {
-  font-size: 48px;
-  font-weight: bold;
-  color: #646cff;
+  font-size: 56px;
+  font-weight: 900;
+  color: #06b6d4;
 }

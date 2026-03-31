@@ -1,53 +1,59 @@
 import { useState } from "react";
 import "./App.css";
 
+import UploadPanel from "./components/UploadPanel";
+import Flashcard from "./components/Flashcard";
+import Controls from "./components/Controls";
+import Quiz from "./components/Quiz";
+import ScoreScreen from "./components/ScoreScreen";
+
 function App() {
+
   const [file, setFile] = useState(null);
   const [cards, setCards] = useState([]);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [mode, setMode] = useState("detailed");
   const [loading, setLoading] = useState(false);
+
   const [quizMode, setQuizMode] = useState(false);
+  const [quizPreparing, setQuizPreparing] = useState(false);
   const [quiz, setQuiz] = useState([]);
   const [quizIndex, setQuizIndex] = useState(0);
   const [selected, setSelected] = useState(null);
   const [score, setScore] = useState(0);
   const [quizDone, setQuizDone] = useState(false);
-  const [quizLoading, setQuizLoading] = useState(false);
 
+  // Upload PDF
   const uploadFile = async () => {
-    if (!file) return alert("Please select a PDF first!");
+    if (!file) return alert("Select PDF");
 
     const formData = new FormData();
     formData.append("file", file);
     formData.append("mode", mode);
 
     setLoading(true);
-    try {
-      const res = await fetch("http://127.0.0.1:8000/upload", {
-        method: "POST",
-        body: formData,
-      });
 
-      const data = await res.json();
-      setCards(data.flashcards);
-      setIndex(0);
-      setFlipped(false);
-    } catch (err) {
-      alert("Error: Could not connect to backend.");
-    } finally {
-      setLoading(false);
-    }
+    const res = await fetch("http://127.0.0.1:8000/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    setCards(data.flashcards);
+    setIndex(0);
+    setFlipped(false);
+    setLoading(false);
   };
 
   const nextCard = () => {
-    setIndex((prev) => (prev + 1) % cards.length);
+    setIndex((i) => (i + 1) % cards.length);
     setFlipped(false);
   };
 
   const prevCard = () => {
-    setIndex((prev) => (prev - 1 + cards.length) % cards.length);
+    setIndex((i) => (i - 1 + cards.length) % cards.length);
     setFlipped(false);
   };
 
@@ -55,159 +61,127 @@ function App() {
     const shuffled = [...cards].sort(() => Math.random() - 0.5);
     setCards(shuffled);
     setIndex(0);
-    setFlipped(false);
   };
 
+  // Quiz
   const startQuiz = async () => {
-    setQuizLoading(true);
-    try {
-      const res = await fetch("http://127.0.0.1:8000/generate-quiz", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ flashcards: cards }),
-      });
-      const data = await res.json();
-      setQuiz(data.quiz);
-      setQuizMode(true);
-      setQuizIndex(0);
-      setScore(0);
-      setSelected(null);
-      setQuizDone(false);
-    } catch (err) {
-      alert("Error generating quiz. Make sure backend is running.");
-    } finally {
-      setQuizLoading(false);
-    }
-  };
+    setQuizPreparing(true);
 
-const handleOptionClick = (option) => {
-    if (selected) return; // prevent changing answer
-    setSelected(option);
-    if (option === quiz[quizIndex].correct) {
-      setScore((prev) => prev + 1);
-    }
-  };
+    const res = await fetch("http://127.0.0.1:8000/generate-quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ flashcards: cards }),
+    });
 
-const nextQuizQuestion = () => {
-    if (quizIndex + 1 >= quiz.length) {
-      setQuizDone(true);
-    } else {
-      setQuizIndex((prev) => prev + 1);
-      setSelected(null);
-    }
-  };
+    const data = await res.json();
 
-const retakeQuiz = () => {
+    setQuiz(data.quiz);
+    setQuizMode(true);
+    setQuizPreparing(false);
     setQuizIndex(0);
     setScore(0);
     setSelected(null);
     setQuizDone(false);
   };
 
-const exitQuiz = () => {
-    setQuizMode(false);
-    setQuizDone(false);
-    setSelected(null);
-    setScore(0);
+  const handleOptionClick = (option) => {
+    if (selected) return;
+
+    setSelected(option);
+    if (option === quiz[quizIndex].correct)
+      setScore((s) => s + 1);
   };
-  
+
+  const nextQuizQuestion = () => {
+    if (quizIndex + 1 >= quiz.length)
+      setQuizDone(true);
+    else {
+      setQuizIndex((i) => i + 1);
+      setSelected(null);
+    }
+  };
+
+  const endQuiz = () => {
+    setQuizDone(true);
+  };
+
+  const retakeQuiz = () => {
+    setQuizIndex(0);
+    setScore(0);
+    setSelected(null);
+    setQuizDone(false);
+  };
+
+  const exitQuiz = () => {
+    setQuizMode(false);
+    setQuizPreparing(false);
+  };
 
   return (
     <div className="app">
-  <h1>StudyCard AI</h1>
+      <h1>StudyCard AI</h1>
 
-  {!quizMode && (
-    <>
-      <input type="file" accept=".pdf" onChange={(e) => setFile(e.target.files[0])} />
-
-      <div className="mode-selector">
-        <button
-          className={mode === "detailed" ? "mode-btn active" : "mode-btn"}
-          onClick={() => setMode("detailed")}
-        >
-          Detailed Answer
-        </button>
-        <button
-          className={mode === "flashwords" ? "mode-btn active" : "mode-btn"}
-          onClick={() => setMode("flashwords")}
-        >
-          One Word Answer
-        </button>
-      </div>
-
-      <button onClick={uploadFile} disabled={loading}>
-        {loading ? "Generating..." : "Upload & Generate"}
-      </button>
-
-      {cards.length > 0 && (
+      {!quizMode && (
         <>
-          <p>{index + 1} / {cards.length}</p>
-
-          <div
-            className={`card-container ${flipped ? "flipped" : ""}`}
-            onClick={() => setFlipped(!flipped)}
-          >
-            <div className="card-inner">
-              <div className="card-front">{cards[index].question}</div>
-              <div className="card-back">{cards[index].answer}</div>
-            </div>
+          <div className="upload-panel">
+            <UploadPanel
+              setFile={setFile}
+              uploadFile={uploadFile}
+              mode={mode}
+              setMode={setMode}
+              loading={loading}
+            />
           </div>
 
-          <div className="controls">
-            <button onClick={prevCard}>Previous</button>
-            <button onClick={nextCard}>Next</button>
-            <button onClick={shuffleCards}>Shuffle</button>
-          </div>
+          {cards.length > 0 && (
+            <>
+              <Flashcard
+                card={cards[index]}
+                flipped={flipped}
+                onFlip={() => setFlipped(!flipped)}
+                index={index}
+                total={cards.length}
+              />
 
-          <button className="quiz-btn" onClick={startQuiz} disabled={quizLoading}>
-            {quizLoading ? "Preparing Quiz..." : "Start Quiz "}
-          </button>
+              <Controls
+                prevCard={prevCard}
+                nextCard={nextCard}
+                shuffleCards={shuffleCards}
+              />
+
+              <button className="quiz-btn" onClick={startQuiz} disabled={quizPreparing}>
+                {quizPreparing ? "Preparing Quiz..." : "Start Quiz"}
+              </button>
+            </>
+          )}
         </>
       )}
-    </>
-  )}
 
-  {quizMode && !quizDone && quiz.length > 0 && (
-    <div className="quiz">
-      <h2>Quiz Mode </h2>
-      <p>{quizIndex + 1} / {quiz.length}</p>
-      <div className="quiz-question">{quiz[quizIndex].question}</div>
+      {quizMode && !quizDone && (
+        <Quiz
+          quiz={quiz}
+          quizIndex={quizIndex}
+          selected={selected}
+          handleOptionClick={handleOptionClick}
+          nextQuizQuestion={nextQuizQuestion}
+          endQuiz={endQuiz}
+          isLastQuestion={quizIndex === quiz.length - 1}
+          totalQuestions={quiz.length}
+        />
+      )}
 
-      <div className="options">
-        {quiz[quizIndex].options.map((option, i) => {
-          let className = "option";
-          if (selected) {
-            if (option === quiz[quizIndex].correct) className += " correct";
-            else if (option === selected) className += " wrong";
-          }
-          return (
-            <button key={i} className={className} onClick={() => handleOptionClick(option)}>
-              {option}
-            </button>
-          );
-        })}
-      </div>
-
-      {selected && (
-        <button className="next-btn" onClick={nextQuizQuestion}>
-          {quizIndex + 1 >= quiz.length ? "See Score" : "Next Question"}
-        </button>
+      {quizMode && quizDone && (
+        <ScoreScreen
+          score={score}
+          total={quiz.length}
+          retakeQuiz={retakeQuiz}
+          exitQuiz={exitQuiz}
+        />
       )}
     </div>
-  )}
-
-  {quizMode && quizDone && (
-    <div className="score-screen">
-      <h2>Quiz Complete! </h2>
-      <p className="score">{score} / {quiz.length} correct</p>
-      <p>{score === quiz.length ? "Perfect score!" : score >= quiz.length / 2 ? "Good job! 💪" : "Keep studying! 📚"}</p>
-      <div className="controls">
-        <button onClick={retakeQuiz}>Retake Quiz</button>
-        <button onClick={exitQuiz}>Back to Flashcards</button>
-      </div>
-    </div>
-  )}
-</div>
   );
 }
+
 export default App;
+
+
