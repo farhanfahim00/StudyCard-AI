@@ -157,13 +157,13 @@ See `requirements.txt` for all Python dependencies and `frontend/package.json` f
 
 ---
 
-## 👥 Authors
+## Authors
 
 - **Farhan Fahim**
 - **Jyotika Vendani**
 
 ---
 
-## 📄 License
+## License
 
 This project is open source and available under the [MIT License](LICENSE).
